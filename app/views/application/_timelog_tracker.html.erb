@@ -1,15 +1,15 @@
 <div id="timelog_tracker">
   <%= form_tag(:method => :post) do |f| %>
     <label for='timelog_tracker_issue_id'>
-      Tracker:
+      <%= t(:tracker, scope: :timelog_tracker) %>:
     </label>
     <%= text_field_tag "timelog_tracker[issue_id]", nil, :size => 6, :required => true %>
 
     <%= select_tag "timelog_tracker[activity_id]", options_for_select(activity_collection_for_select_options), :required => true %>
-    <%= submit_tag "Start", :class => "start-button" %>
-    <%= submit_tag "Cancel", :class => "cancel-button" %>
-    <%= submit_tag "Commit", :class => "commit-button" %>
-    <%= submit_tag "Commit & Edit", :class => "commit-and-edit-button" %>
+    <%= submit_tag t(:start, scope: :timelog_tracker), :class => "start-button" %>
+    <%= submit_tag t(:cancel, scope: :timelog_tracker), :class => "cancel-button" %>
+    <%= submit_tag t(:commit, scope: :timelog_tracker), :class => "commit-button" %>
+    <%= submit_tag t(:commit_and_edit, scope: :timelog_tracker), :class => "commit-and-edit-button" %>
   <% end %>
 
   <div class="subtitle">

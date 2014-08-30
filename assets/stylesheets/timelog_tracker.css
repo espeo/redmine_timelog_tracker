@@ -1,0 +1,27 @@
+#timelog_tracker {
+  display: none;
+  float: right;
+  margin-top: -10px;
+}
+
+#timelog_tracker:not(.tracking) .cancel-button,
+#timelog_tracker:not(.tracking) .commit-button,
+#timelog_tracker:not(.tracking) .commit-and-edit-button {
+  display: none;
+}
+
+#timelog_tracker.tracking .start-button {
+  display: none;
+}
+
+#timelog_tracker .subtitle {
+  margin-top: 5px;
+}
+
+#timelog_tracker_issue_name {
+  float: left;
+}
+
+#timelog_tracker_time {
+  float: right;
+}

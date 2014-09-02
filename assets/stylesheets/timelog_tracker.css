@@ -2,6 +2,7 @@
   display: none;
   float: right;
   margin-top: -10px;
+  clear: right;
 }
 
 #timelog_tracker:not(.tracking) .cancel-button,

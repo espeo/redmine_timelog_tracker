@@ -33,6 +33,8 @@ class TimelogTrackerController < ApplicationController
   end
 
   def commit
+    current_tracked_time_entry.safe_attributes = params[:timelog_tracker] if params[:timelog_tracker]
+
     if current_tracked_time_entry
       time_entry = TimeEntry.new
       time_entry.user = current_tracked_time_entry.user

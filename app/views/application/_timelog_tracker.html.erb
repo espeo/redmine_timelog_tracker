@@ -5,7 +5,7 @@
     </label>
     <%= text_field_tag "timelog_tracker[issue_id]", nil, :size => 6, :required => true %>
 
-    <%= select_tag "timelog_tracker[activity_id]", options_for_select(activity_collection_for_select_options), :required => true %>
+    <%= select_tag "timelog_tracker[activity_id]", options_for_select(activity_collection_for_select_options(nil, @project)), :required => true %>
     <%= submit_tag t(:start, scope: :timelog_tracker), :class => "start-button" %>
     <%= submit_tag t(:cancel, scope: :timelog_tracker), :class => "cancel-button" %>
     <%= submit_tag t(:commit, scope: :timelog_tracker), :class => "commit-button" %>
@@ -24,7 +24,7 @@
 <%= stylesheet_link_tag 'timelog_tracker', plugin: 'espeo_timelog_tracker' %>
 
 <%= javascript_tag do %>
-  observeAutocompleteField('timelog_tracker_issue_id', '<%= escape_javascript auto_complete_issues_path(:scope => 'all')%>', {
+  observeAutocompleteField('timelog_tracker_issue_id', '<%= escape_javascript auto_complete_issues_path(:project_id => @project, :scope => (@project ? nil : 'all')) %>', {
     select: function(event, ui) {
       $('#timelog_tracker_issue_name').text(ui.item.label);
     }

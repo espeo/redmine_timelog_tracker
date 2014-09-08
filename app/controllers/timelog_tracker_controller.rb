@@ -39,7 +39,7 @@ class TimelogTrackerController < ApplicationController
       time_entry.activity = current_tracked_time_entry.activity
       time_entry.issue = current_tracked_time_entry.issue
       time_entry.spent_on = current_tracked_time_entry.created_at.to_date
-      time_entry.hours = (Time.now - current_tracked_time_entry.created_at) / 1.hour
+      time_entry.hours = ((Time.now - current_tracked_time_entry.created_at) / 1.hour).round(2)
 
       if time_entry.transaction { time_entry.save && current_tracked_time_entry.destroy }
         render json: time_entry

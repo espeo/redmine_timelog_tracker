@@ -8,6 +8,7 @@
     var self = this;
 
     this.$container = $("#timelog_tracker");
+    this.$inputs = this.$container.find("#timelog_tracker_activity_id, #timelog_tracker_issue_id");
 
     $(document).ready(function(){
       self.init();
@@ -28,6 +29,7 @@
 
     this.$container.find(".cancel-button").click(function TimelogTracker__clickCancelButton(event){
       event.preventDefault();
+
       self.cancel(function(){
         setTimeout(function(){
           self.$container.find("#timelog_tracker_issue_id").focus();
@@ -37,6 +39,7 @@
 
     this.$container.find(".start-button").click(function TimelogTracker__clickStartButton(event){
       event.preventDefault();
+
       self.start(function(){
         setTimeout(function(){
           self.$container.find(".commit-button").focus();
@@ -46,6 +49,7 @@
 
     this.$container.find(".commit-button").click(function TimelogTracker__clickCommitButton(event){
       event.preventDefault();
+
       self.commit(function(){
         setTimeout(function(){
           self.$container.find("#timelog_tracker_issue_id").focus();
@@ -55,6 +59,7 @@
 
     this.$container.find(".commit-and-edit-button").click(function TimelogTracker__clickCommitAndEditButton(event){
       event.preventDefault();
+
       self.commit(function(timeEntry){
         self.editTimeEntry(timeEntry.id);
         setTimeout(function(){
@@ -70,18 +75,42 @@
       }
     });
 
+    this._triggerUpdate = $.debounce(300, function(){
+      console.log('updating!');
+      self.update();
+    });
+
+    this.$inputs.change(function(){
+      self.rerender();
+
+      if (self.currentTimeEntry) {
+        self._triggerUpdate();
+      }
+    }).change();
+
     this.$container.insertAfter("#header h1").show();
+  };
+
+  TimelogTracker.prototype.rerender = function() {
+    this.$container.toggleClass("tracking", !!this.currentTimeEntry);
+    this.$inputs.prop("required", !!this.currentTimeEntry);
+
+    this.isFormValid = true,
+        $invalidInputs = this.$inputs.filter(function(){
+          return $(this).prop("required") && !$(this).val();
+        });
+    if ($invalidInputs.length > 0) {
+      this.isFormValid = false;
+    }
+
+    this.$container.find("button, input[type=submit]").prop("disabled", !this.isFormValid);
   };
 
   TimelogTracker.prototype._setCurrentTrackedTimeEntry = function(timeEntry) {
     var self = this;
 
     this.currentTimeEntry = timeEntry;
-
-    var $inputs = this.$container.find("#timelog_tracker_activity_id, #timelog_tracker_issue_id");
-
-    this.$container.toggleClass("tracking", !!timeEntry);
-    $inputs.prop("disabled", !!timeEntry);
+    this.rerender();
 
     if (this.__updateTimeInterval) {
       clearInterval(this.__updateTimeInterval);
@@ -99,7 +128,7 @@
       }, 1000);
     } else {
       $("#timelog_tracker_issue_name").html("");
-      $inputs.val("");
+      this.$inputs.val("");
 
       var activityId = sessionStorage.getItem("timelog_tracker.default_activity_id")
       if (activityId) {
@@ -134,6 +163,20 @@
     }).fail(onError || noop);
   };
 
+  TimelogTracker.prototype.update = function TimelogTracker__start(onSuccess, onError) {
+    var self = this;
+
+    return $.ajax({
+      url: REDMINE_ORIGIN + "/timelog_tracker/update",
+      type: 'POST',
+      data: this.$container.find("form").serialize()
+    }).done(function(data){
+      (onSuccess || noop)(data.tracked_time_entry);
+
+      self._setCurrentTrackedTimeEntry(data.tracked_time_entry);
+    }).fail(onError || noop);
+  };
+
   TimelogTracker.prototype.cancel = function TimelogTracker__cancel(onSuccess, onError) {
     var self = this;
 
@@ -150,6 +193,10 @@
 
   TimelogTracker.prototype.commit = function TimelogTracker__commit(onSuccess, onError) {
     var self = this;
+
+    if (!this.isFormValid) {
+      return false;
+    }
 
     return $.ajax({
       url: REDMINE_ORIGIN + "/timelog_tracker/commit",

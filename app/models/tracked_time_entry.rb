@@ -7,7 +7,7 @@ class TrackedTimeEntry < ActiveRecord::Base
   belongs_to :user
   belongs_to :activity, :class_name => 'TimeEntryActivity', :foreign_key => 'activity_id'
 
-  validates_presence_of :user_id, :activity_id, :issue_id
+  validates_presence_of :user_id
 
   safe_attributes 'issue_id', 'activity_id'
 end

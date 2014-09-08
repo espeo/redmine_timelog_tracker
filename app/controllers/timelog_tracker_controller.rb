@@ -32,10 +32,23 @@ class TimelogTrackerController < ApplicationController
     end
   end
 
-  def commit
-    current_tracked_time_entry.safe_attributes = params[:timelog_tracker] if params[:timelog_tracker]
-
+  def update
     if current_tracked_time_entry
+      current_tracked_time_entry.safe_attributes = params[:timelog_tracker] if params[:timelog_tracker]
+      current_tracked_time_entry.save
+
+      render json: current_tracked_time_entry
+    else
+      render status: :bad_request, json: {
+        error_code: "tracked_time_entry_doesnt_exist"
+      }
+    end
+  end
+
+  def commit
+    if current_tracked_time_entry
+      current_tracked_time_entry.safe_attributes = params[:timelog_tracker] if params[:timelog_tracker]
+
       time_entry = TimeEntry.new
       time_entry.user = current_tracked_time_entry.user
       time_entry.activity = current_tracked_time_entry.activity

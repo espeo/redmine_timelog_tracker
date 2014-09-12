@@ -1,8 +1,42 @@
 class TimelogTrackerController < ApplicationController
   unloadable
 
+  before_filter :find_project, only: :autocomplete_issues
+
   before_filter do
     User.current.allowed_to_globally? :log_time, {}
+  end
+
+  def autocomplete_issues
+    @issues = []
+    q = (params[:q] || params[:term]).to_s.strip
+    if q.present?
+      scope = (@project.nil? ? Issue : @project.issues).visible
+      if q.match(/\A#?(\d+)\z/)
+        @issues << scope.find_by_id($1.to_i)
+      end
+      @issues += scope.where("LOWER(#{Issue.table_name}.subject) LIKE LOWER(?)", "%#{q}%").order("#{Issue.table_name}.id DESC").limit(10).all
+      @issues.compact!
+    end
+
+    json_data = @issues.map do |issue|
+      {
+        id: issue.id,
+        label: "[#{issue.project.name}] #{issue.tracker} ##{issue.id}: #{issue.subject.to_s.truncate(60)}",
+        value: issue.id,
+        project: ({
+          id: issue.project.id,
+          activities: issue.project.activities.map do |activity|
+            {
+              id: activity.id,
+              name: activity.name,
+            }
+          end
+        } if issue.project)
+      }
+    end
+
+    render :json => json_data
   end
 
   def cancel
@@ -75,5 +109,13 @@ class TimelogTrackerController < ApplicationController
 
     def current_tracked_time_entry
       @current_tracked_time_entry ||= TrackedTimeEntry.find_by_user_id(User.current.id)
+    end
+
+    def find_project
+      if params[:project_id].present?
+        @project = Project.find(params[:project_id])
+      end
+    rescue ActiveRecord::RecordNotFound
+      render_404
     end
 end

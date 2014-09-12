@@ -9,6 +9,8 @@
 
     this.$container = $("#timelog_tracker");
     this.$inputs = this.$container.find("#timelog_tracker_activity_id, #timelog_tracker_issue_id");
+    this.$activity = this.$container.find("#timelog_tracker_activity_id");
+    this.$issue = this.$container.find("#timelog_tracker_issue_id");
 
     $(document).ready(function(){
       self.init();
@@ -76,7 +78,6 @@
     });
 
     this._triggerUpdate = $.debounce(300, function(){
-      console.log('updating!');
       self.update();
     });
 
@@ -86,8 +87,9 @@
       if (self.currentTimeEntry) {
         self._triggerUpdate();
       }
-    }).change();
+    });
 
+    self.rerender();
     this.$container.insertAfter("#header h1").show();
   };
 
@@ -164,11 +166,12 @@
   };
 
   TimelogTracker.prototype.update = function TimelogTracker__start(onSuccess, onError) {
+    console.debug('TimelogTracker.update()');
     var self = this;
 
     return $.ajax({
-      url: REDMINE_ORIGIN + "/timelog_tracker/update",
-      type: 'POST',
+      url: REDMINE_ORIGIN + "/timelog_tracker",
+      type: 'PATCH',
       data: this.$container.find("form").serialize()
     }).done(function(data){
       (onSuccess || noop)(data.tracked_time_entry);
@@ -213,6 +216,15 @@
     var url = REDMINE_ORIGIN + "/time_entries/" + timeEntryId + "/edit";
 
     window.open(url);
+  };
+
+  TimelogTracker.prototype.setActivities = function(activities) {
+    var currentActivityId = +this.$activity.val();
+
+    this.$activity.html(activities.map(function(activity){
+      return "<option value='"+ activity.id +"'>"+ activity.name +"</option>";
+    }).join(""));
+    this.$activity.val(currentActivityId);
   };
 
   window.timelogTracker = new TimelogTracker();

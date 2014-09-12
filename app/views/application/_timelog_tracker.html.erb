@@ -14,7 +14,7 @@
 
   <div class="subtitle">
     <% issue = current_tracked_time_entry.issue if current_tracked_time_entry %>
-    <span id="timelog_tracker_issue_name"><%= ("#{issue.tracker} ##{issue.id}: #{issue.subject.to_s.truncate(60)}") if issue %></span>
+    <span id="timelog_tracker_issue_name"><%= ("[#{issue.project.name}] #{issue.tracker} ##{issue.id}: #{issue.subject.to_s.truncate(60)}") if issue %></span>
 
     <span id="timelog_tracker_time"></span>
   </div>
@@ -25,10 +25,13 @@
 <%= stylesheet_link_tag 'timelog_tracker', plugin: 'espeo_timelog_tracker' %>
 
 <%= javascript_tag do %>
-  observeAutocompleteField('timelog_tracker_issue_id', '<%= escape_javascript auto_complete_issues_path(:project_id => @project, :scope => (@project ? nil : 'all')) %>', {
+  observeAutocompleteField('timelog_tracker_issue_id', '<%= escape_javascript autocomplete_issues_timelog_tracker_index_path(:project_id => @project) %>', {
     select: function(event, ui) {
       $(this).change();
       $('#timelog_tracker_issue_name').text(ui.item.label);
+      if (ui.item.project && ui.item.project.activities.length) {
+        timelogTracker.setActivities(ui.item.project.activities);
+      }
     }
   });
 

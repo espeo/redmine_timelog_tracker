@@ -13,6 +13,7 @@ module EspeoTimelogTracker
     # Add timelog.js to <head></head> of every page.
     def view_layouts_base_body_bottom(context = {})
       return unless User.current.logged?
+      return unless User.current.allowed_to?(:log_time, context[:project], {global: context[:project].nil?})
 
       context[:controller].send(:render_to_string, {
         :partial => "timelog_tracker",

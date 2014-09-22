@@ -5,7 +5,7 @@
     </label>
     <%= text_field_tag "timelog_tracker[issue_id]", nil, :size => 6, :required => true %>
 
-    <%= select_tag "timelog_tracker[activity_id]", options_for_select(activity_collection_for_select_options(nil, @project)), :required => true %>
+    <%= select_tag "timelog_tracker[activity_id]", options_for_select(activity_collection_for_timelog_tracker_select_options), :required => true %>
     <%= submit_tag t(:start, scope: :timelog_tracker), :class => "button start-button" %>
     <%= submit_tag t(:cancel, scope: :timelog_tracker), :class => "button cancel-button", :type => :reset %>
     <%= submit_tag t(:commit, scope: :timelog_tracker), :class => "button commit-button" %>

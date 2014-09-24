@@ -97,10 +97,10 @@
     this.$container.toggleClass("tracking", !!this.currentTimeEntry);
     this.$inputs.prop("required", !!this.currentTimeEntry);
 
-    this.isFormValid = true,
-        $invalidInputs = this.$inputs.filter(function(){
-          return $(this).prop("required") && !$(this).val();
-        });
+    this.isFormValid = true;
+    var $invalidInputs = this.$inputs.filter(function(){
+      return $(this).prop("required") && !$(this).val();
+    });
     if ($invalidInputs.length > 0) {
       this.isFormValid = false;
     }
@@ -112,7 +112,6 @@
     var self = this;
 
     this.currentTimeEntry = timeEntry;
-    this.rerender();
 
     if (this.__updateTimeInterval) {
       clearInterval(this.__updateTimeInterval);
@@ -128,6 +127,7 @@
       this.__updateTimeInterval = setInterval(function(){
         self._updateTime();
       }, 1000);
+      self._updateTime();
     } else {
       $("#timelog_tracker_issue_name").html("");
       this.$inputs.val("");
@@ -137,6 +137,8 @@
         this.$container.find("#timelog_tracker_activity_id").val(activityId);
       }
     }
+
+    this.rerender();
   };
 
   TimelogTracker.prototype._updateTime = function() {
@@ -151,6 +153,18 @@
     $("#timelog_tracker_time").html(time);
   };
 
+  TimelogTracker.prototype.handleAjaxError = function(jqXHR) {
+    var data;
+    try {
+      data = JSON.parse(jqXHR.responseText);
+    } catch(e) {
+    }
+
+    if (typeof data === "object" && data.errors) {
+      alert("Server returned error:" + data.errors.join("\n"));
+    }
+  };
+
   TimelogTracker.prototype.start = function TimelogTracker__start(onSuccess, onError) {
     var self = this;
 
@@ -162,7 +176,7 @@
       (onSuccess || noop)(data.tracked_time_entry);
 
       self._setCurrentTrackedTimeEntry(data.tracked_time_entry);
-    }).fail(onError || noop);
+    }).fail(onError || self.handleAjaxError);
   };
 
   TimelogTracker.prototype.update = function TimelogTracker__start(onSuccess, onError) {
@@ -177,7 +191,7 @@
       (onSuccess || noop)(data.tracked_time_entry);
 
       self._setCurrentTrackedTimeEntry(data.tracked_time_entry);
-    }).fail(onError || noop);
+    }).fail(onError || self.handleAjaxError);
   };
 
   TimelogTracker.prototype.cancel = function TimelogTracker__cancel(onSuccess, onError) {
@@ -191,7 +205,7 @@
       (onSuccess || noop)();
 
       self._setCurrentTrackedTimeEntry(null);
-    }).fail(onError || noop);
+    }).fail(onError || self.handleAjaxError);
   };
 
   TimelogTracker.prototype.commit = function TimelogTracker__commit(onSuccess, onError) {
@@ -209,7 +223,7 @@
       (onSuccess || noop)(data.time_entry);
 
       self._setCurrentTrackedTimeEntry(null);
-    }).fail(onError || noop);
+    }).fail(onError || self.handleAjaxError);
   };
 
   TimelogTracker.prototype.editTimeEntry = function(timeEntryId) {

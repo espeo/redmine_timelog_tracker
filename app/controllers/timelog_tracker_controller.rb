@@ -61,7 +61,7 @@ class TimelogTrackerController < ApplicationController
     else
       render status: :bad_request, json: {
         error_code: "save_failed",
-        errors: entry.errors
+        errors: entry.errors.full_messages
       }
     end
   end
@@ -95,7 +95,7 @@ class TimelogTrackerController < ApplicationController
       else
         render status: :bad_request, json: {
           error_code: "save_failed",
-          errors: time_entry.errors
+          errors: time_entry.errors.full_messages
         }
       end
     else

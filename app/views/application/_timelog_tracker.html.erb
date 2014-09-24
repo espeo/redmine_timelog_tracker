@@ -35,5 +35,7 @@
     }
   });
 
-  timelogTracker._setCurrentTrackedTimeEntry((<%= current_tracked_time_entry.to_json.html_safe %> || {}).tracked_time_entry);
+  jQuery(document).ready(function(){
+    timelogTracker._setCurrentTrackedTimeEntry((<%= current_tracked_time_entry.to_json.html_safe %> || {}).tracked_time_entry);
+  });
 <% end %>
